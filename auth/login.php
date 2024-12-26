@@ -17,6 +17,7 @@
         h2 {
             text-align: center;
             color: darkslategray;
+            margin-bottom: 15px;
         }
         .container {
             display: flex;
@@ -33,8 +34,8 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .form-box {
-            width: 450px;
-            margin: 0px 10px;
+            width: 100%;
+            max-width: 450px;
         }
         .form-box header {
             font-size: 25px;
@@ -45,7 +46,7 @@
         }
         .form-box form .field {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             flex-direction: column;
         }
         .form-box form .input input {
@@ -65,7 +66,7 @@
         .password-container input {
             flex: 1;
             height: 40px;
-            padding-right: 40px; /* Space for the button */
+            padding-right: 40px;
         }
         .password-container button {
             position: absolute;
@@ -79,7 +80,7 @@
             height: 100%;
         }
         .btn {
-            height: 35px;
+            height: 40px;
             background: darkslategray;
             border: 0;
             border-radius: 5px;
@@ -88,13 +89,14 @@
             cursor: pointer;
             transition: all .3s;
             margin-top: 10px;
-            padding: 0px 10px;
+            padding: 0 10px;
         }
         .btn:hover {
-            opacity: 0.82;
+            opacity: 0.9;
         }
-        .links {
-            margin-bottom: 15px;
+        .link {
+            text-align: center;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -104,14 +106,14 @@
             <h2>Login</h2>
             <form action="" method="post">
                 <div class="field input">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="example@domain.com" required>
                 </div>
                 <div class="field input">
                     <label for="password">Password:</label>
                     <div class="password-container">
                         <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                        <button type="button" id="togglePassword">👁️</button>
+                        <button type="button" id="togglePassword" aria-label="Toggle password visibility">👁️</button>
                     </div>
                 </div>
                 <div class="field input">
@@ -130,19 +132,20 @@
             const passwordField = document.getElementById('password');
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
+            this.textContent = type === 'password' ? '👁️' : '🙈';
         });
     </script>
 
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+        $email = htmlspecialchars(trim($_POST['email']));
+        $password = htmlspecialchars(trim($_POST['password']));
 
         // Example of processing login (replace with actual database logic)
-        if ($username === 'admin' && $password === 'password') {
+        if ($email === 'admin' && $password === 'password') {
             echo '<script>alert("Login successful!");</script>';
         } else {
-            echo '<script>alert("Invalid username or password.");</script>';
+            echo '<script>alert("Invalid email or password.");</script>';
         }
     }
     ?>

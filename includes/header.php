@@ -25,7 +25,6 @@ if (session_status() == PHP_SESSION_NONE) {
     <nav class="jp-nav">
         <ul>
             <li><a href="index.php">Home</a></li>
-            <li><a href="index.php">About Us</a></li>
             <li><a href="jobs/job_listings.php">Jobs</a></li>
             <li><a href="auth/login.php">Login</a></li>
             <li><a href="auth/register.php">Register</a></li>
