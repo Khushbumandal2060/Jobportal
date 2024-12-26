@@ -1,191 +1,150 @@
-<?php
-session_start();
-include('../includes/db.php');
-
-// Check if the user is already logged in and redirect to the appropriate dashboard
-if (isset($_SESSION['role'])) {
-    if ($_SESSION['role'] == 'employer') {
-        header("Location: employer_dashboard.php");
-        exit();
-    } elseif ($_SESSION['role'] == 'job_seeker') {
-        header("Location: job_seeker_dashboard.php");
-        exit();
-    }
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-
-    // Query to fetch user details based on email
-    $sql = "SELECT * FROM users WHERE email = '$email'";
-    $result = mysqli_query($conn, $sql);
-    $user = mysqli_fetch_assoc($result);
-
-    if ($user && password_verify($password, $user['password'])) {
-        // Successful login: set session variables
-        $_SESSION['id'] = $user['id'];
-        $_SESSION['name'] = $user['name'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['role'] = $user['user_type']; // 'employer' or 'job_seeker'
-
-        // Redirect based on the user role
-        if ($user['user_type'] == 'employer') {
-            header("Location: employer_dashboard.php");
-        } else {
-            header("Location: job_seeker_dashboard.php");
-        }
-        exit();
-    } else {
-        $error = "Invalid email or password.";
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/style.css">
     <title>Login</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+        * {
             padding: 0;
-            background: url('../assets/images/background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
-
-        .form-container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+        body {
+            background: #e4e9f7;
         }
-
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #333;
+            color: darkslategray;
         }
-
-        label {
-            font-size: 14px;
-            font-weight: bold;
-            color: #555;
-            display: block;
-            margin-bottom: 5px;
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
         }
-
-        input[type="email"], input[type="password"] {
+        .box {
+            background: #fdfdfd;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-box {
+            width: 450px;
+            margin: 0px 10px;
+        }
+        .form-box header {
+            font-size: 25px;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e6e6e6;
+            margin-bottom: 10px;
+        }
+        .form-box form .field {
+            display: flex;
+            margin-bottom: 10px;
+            flex-direction: column;
+        }
+        .form-box form .input input {
+            height: 40px;
             width: 100%;
-            padding: 12px;
-            margin: 10px 0 20px;
+            font-size: 16px;
+            padding: 0 10px;
+            border-radius: 5px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
+            outline: none;
         }
-
-        .toggle-password {
-            float: right;
-            margin-top: -30px;
-            margin-right: 10px;
-            cursor: pointer;
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
+        .password-container input {
+            flex: 1;
+            height: 40px;
+            padding-right: 40px; /* Space for the button */
+        }
+        .password-container button {
+            position: absolute;
+            right: 10px;
+            background: none;
             border: none;
-            border-radius: 4px;
+            font-size: 18px;
             cursor: pointer;
+            color: darkslategray;
+            padding: 0;
+            height: 100%;
         }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .form-footer {
-            text-align: center;
+        .btn {
+            height: 35px;
+            background: darkslategray;
+            border: 0;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all .3s;
             margin-top: 10px;
+            padding: 0px 10px;
         }
-
-        .form-footer a {
-            color: #007bff;
-            text-decoration: none;
+        .btn:hover {
+            opacity: 0.82;
         }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .error {
-            color: red;
-            text-align: center;
-            margin-top: 10px;
+        .links {
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-
-<div class="form-container">
-    <h2>Login</h2>
-    <form id="loginForm" action="login.php" method="POST">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        <span class="toggle-password" onclick="togglePassword()">👁️</span>
-
-        <?php if (isset($error)) { echo "<div class='error'>$error</div>"; } ?>
-
-        <button type="submit">Login</button>
-    </form>
-    <div class="form-footer">
-        <p>Don't have an account? <a href="register.php">Register here</a>.</p>
+    <div class="container">
+        <div class="box form-box">
+            <h2>Login</h2>
+            <form action="" method="post">
+                <div class="field input">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="field input">
+                    <label for="password">Password:</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" id="togglePassword">👁️</button>
+                    </div>
+                </div>
+                <div class="field input">
+                    <input type="submit" class="btn" name="submit" value="Login">
+                </div>
+                <div class="link">
+                    <p>Don't have an account? <a href="register.php">Register here</a>.</p>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    // Form validation
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+        });
+    </script>
 
-        if (!email || !password) {
-            alert('Please fill in all fields.');
-            event.preventDefault();
-        } else if (!emailRegex.test(email)) {
-            alert('Please enter a valid email address.');
-            event.preventDefault();
-        }
-    });
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
 
-    // Password toggle visibility
-    function togglePassword() {
-        const passwordField = document.getElementById('password');
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
+        // Example of processing login (replace with actual database logic)
+        if ($username === 'admin' && $password === 'password') {
+            echo '<script>alert("Login successful!");</script>';
         } else {
-            passwordField.type = 'password';
+            echo '<script>alert("Invalid username or password.");</script>';
         }
     }
-</script>
-
+    ?>
 </body>
 </html>

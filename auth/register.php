@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         h1 {
             text-align: center;
             margin-bottom: 20px;
-           color: darkcyan;
+           color: darkslategray;
         }
         .form-group {
             margin-bottom: 15px;
@@ -88,6 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            
         }
         button {
             width: 100%;
